@@ -8,7 +8,9 @@ from dotenv import load_dotenv
 load_dotenv() # get secret environment variables
 
 description = "A simple bot for posting cute cat pictures"
-fileList = os.listdir("images/") # use listdir to get list of image names
+
+bingusFileList = os.listdir("images/bingus") # use listdir to get list of image names for the bingus directory
+floppaFileList = os.listdir("images/floppa") # use listdir to get list of image names for the floppa directory
 
 intents = discord.Intents.all() # enable (all) privileged gateway intents
 
@@ -21,9 +23,14 @@ async def on_ready():
 # ? display a random picture of bingus
 @bot.command(name = "bingus") # create new command, pass 'name' keyword argument into the decorator
 async def postImage(ctx):
-	fileNameChoice = "images/" + random.choice(fileList) # get a random file name from list
+	fileNameChoice = "images/bingus" + random.choice(bingusFileList) # get a random file name from list
 	await ctx.send(file = discord.File(fileNameChoice))
-
+	
+# ? display a random picture of floppa
+@bot.command(name = "floppa") # create new command, pass 'name' keyword argument into the decorator
+async def postImage(ctx):
+	fileNameChoice = "images/floppa" + random.choice(floppaFileList) # get a random file name from list
+	await ctx.send(file = discord.File(fileNameChoice))
 
 # ? display the songs a user is listening, or every user if no input param is received
 @bot.command(name = "listening")
@@ -61,4 +68,4 @@ async def listen(ctx, user: discord.Member = None):
 		embed.set_image(url = "https://c.tenor.com/BCqVPaQdwBsAAAAC/bingus-binguscord.gif") # error image
 		await ctx.send(embed = embed)
 
-bot.run(os.getenv('TOKEN')) # run the bot using the token environment variable
+bot.run(os.getenv('TOKEN')) # run the bot using the 'TOKEN' environment variable
