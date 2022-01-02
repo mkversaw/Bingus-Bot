@@ -71,7 +71,12 @@ async def updateLevel(users, user, channel, server):
 	lvlEnd = int(experience ** (0.25)) # what experience level user needs to reach to level up
 
 	if lvlStart < lvlEnd:
-		await channel.reply("{} has leveled up to Level {}".format(user.name, lvlEnd))
+		embed = discord.Embed(title = 'Comrade {} is now level {}!'.format(user.name, lvlEnd) , color = discord.Color.red())
+		embed.set_author(name = user.name, icon_url = user.avatar_url)
+		embed.set_footer(text = "Glory to Bingustan")
+		embed.set_thumbnail(url = user.avatar_url)
+		await channel.send(embed = embed)
+		
 		users[serverID][userID]["level"] = lvlEnd
 
 @bot.command(aliases = ["rank","lvl","credit","socialcredit"], brief = "Check exp", description = "Check how much experience you, or another user has")
@@ -80,28 +85,23 @@ async def level(ctx,member: discord.Member = None):
 		user = ctx.message.author
 	else: # otherwise, get the data for the specified user
 		user = member
-	
-	try:
-		guild = ctx.guild
-		userID = str(user.id) # cast to string for usage with JSON
-		serverID = str(ctx.guild.id)
-	except discord.ext.commands.MemberNotFound:
-		print("member not found!")
-		user = ctx.message.author
-		guild = ctx.guild
-		userID = str(user.id) # cast to string for usage with JSON
-		serverID = str(ctx.guild.id)
+
+	userID = str(user.id) # cast to string for usage with JSON
+	serverID = str(ctx.guild.id)
 	
 
 	with open("levels.json","r") as levelsFile:
 		userJSON = json.load(levelsFile)
 	level = userJSON[serverID][userID]["level"]
 	experience = userJSON[serverID][userID]['experience']
-
-	embed = discord.Embed(title = 'Level {}'.format(level), description = f"{experience} XP " ,color = discord.Color.green())
+	expToNextLevel = ( (level + 1)**4 ) - experience # calculate remaining exp to level up
+	embed = discord.Embed(title = 'Citizen Level {}'.format(level), description = f"{experience} Social Credit Points " ,color = discord.Color.red())
 	embed.set_author(name = user.name, icon_url = user.avatar_url)
-
-	await ctx.reply(embed = embed)
+	embed.add_field(name = "Points to next level", value = str(expToNextLevel) + " 元")
+	embed.set_footer(text = "Glory to Bingustan")
+	file = discord.File("./images/bingusflag.jpg", filename = "image.png") # FILENAME MUST BE IMAGE.PNG
+	embed.set_thumbnail(url = "attachment://image.png")
+	await ctx.reply(file = file , embed = embed)
 
 @level.error
 async def levelError(ctx, error):
@@ -120,12 +120,12 @@ bot.lastRolledBingus = None
 @bot.command(name = "bingus", brief = "Posts a bingus") # create new command, pass 'name' keyword argument into the decorator
 async def postImage(ctx):
 	if(bot.lastRolledBingus == None): # no previous image of bingus rolled
-		fileNameChoice = "images/bingus/" + random.choice(floppaFileList) # get a random file name from list
+		fileNameChoice = "images/bingus/" + random.choice(bingusFileList) # get a random file name from list
 		bot.lastRolledFloppa = fileNameChoice # update previous image holder var
 	else:
-		fileNameChoice = "images/bingus/" + random.choice(floppaFileList) # get a random file name from list
+		fileNameChoice = "images/bingus/" + random.choice(bingusFileList) # get a random file name from list
 		while(fileNameChoice == bot.lastRolledFloppa): # roll until no repeat (shouldn't take long)
-			fileNameChoice = "images/bingus/" + random.choice(floppaFileList) # get a random file name from list
+			fileNameChoice = "images/bingus/" + random.choice(bingusFileList) # get a random file name from list
 			bot.lastRolledFloppa = fileNameChoice # update previous image holder var
 	await ctx.reply(file = discord.File(fileNameChoice)) # post the image
 
@@ -161,7 +161,7 @@ async def listen(ctx, user: discord.Member = None):
 					embed.set_author(name = f"{member.name}'s Spotify", icon_url = member.avatar_url)
 					embed.add_field(name = "Artist", value = activity.artist)
 					embed.add_field(name = "Album", value = activity.album)
-					embed.set_footer(text = "*Song started at {} UTC*".format(activity.created_at.strftime("%H:%M")))
+					embed.set_footer(text = "Song started at {} UTC".format(activity.created_at.strftime("%H:%M")))
 					await ctx.reply(embed = embed)
 	else: # get spotify activity for specific user
 		for activity in user.activities: # iterate through the given users activities
@@ -172,7 +172,7 @@ async def listen(ctx, user: discord.Member = None):
 				embed.set_author(name = f"{user.name}'s Spotify", icon_url = user.avatar_url)
 				embed.add_field(name = "Artist", value = activity.artist)
 				embed.add_field(name = "Album", value = activity.album)
-				embed.set_footer(text = "*Song started at {} UTC*".format(activity.created_at.strftime("%H:%M")))
+				embed.set_footer(text = "Song started at {} UTC".format(activity.created_at.strftime("%H:%M")))
 				await ctx.reply(embed = embed)
 	if(not foundResult): # no results found
 		embed = discord.Embed(title = "Couldn't find anyone listening to music :(")
