@@ -40,6 +40,10 @@ async def on_message(message):
 
 		with open("levels.json","w") as levelsFile:
 			json.dump(userJSON, levelsFile)
+
+		if message.author.id == 140926347198332929:
+			print("correctly got the id")
+			await message.add_reaction(":nerd:")
 	await bot.process_commands(message)
 
 # ? check if user and/or server exist in json file, if not update the file accordingly
